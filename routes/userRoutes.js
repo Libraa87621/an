@@ -1,11 +1,10 @@
 const express = require("express");
-const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../Models/userModel");
 
 const router = express.Router();
 
-// Đăng ký
+// Đăng ký (LƯU mật khẩu dạng plain text, không mã hóa)
 router.post("/register", async (req, res) => {
     try {
         const { fullName, email, phoneNumber, password } = req.body;
@@ -13,9 +12,7 @@ router.post("/register", async (req, res) => {
         const existingUser = await User.findOne({ email });
         if (existingUser) return res.status(400).json({ message: "Email đã được sử dụng" });
 
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        const newUser = new User({ fullName, email, phoneNumber, password: hashedPassword });
+        const newUser = new User({ fullName, email, phoneNumber, password });
         await newUser.save();
 
         res.status(201).json({ message: "Đăng ký thành công" });
@@ -24,7 +21,7 @@ router.post("/register", async (req, res) => {
     }
 });
 
-// Đăng nhập
+// Đăng nhập (So sánh mật khẩu trực tiếp, không mã hóa)
 router.post("/login", async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -32,8 +29,7 @@ router.post("/login", async (req, res) => {
 
         if (!user) return res.status(400).json({ message: "Tài khoản không tồn tại" });
 
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) return res.status(400).json({ message: "Mật khẩu không đúng" });
+        if (password !== user.password) return res.status(400).json({ message: "Mật khẩu không đúng" });
 
         const token = jwt.sign({ userId: user._id }, "secretKey", { expiresIn: "1h" });
 
