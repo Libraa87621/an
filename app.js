@@ -14,13 +14,12 @@ app.use(express.json());
 app.use(cors());
 
 mongoose
-    .connect("mongodb://localhost:27017/React2",)
-    .then(() => console.log("MongoDB connected"))
-    .catch(err => console.log(err));
+    .connect("mongodb+srv://Libraaa:gLfxhJL8qDeBPCFt@cluster0.olub1.mongodb.net/React2",)
+    .then(() => console.log("Kết nối MongoDB thành công!"))
+    .catch(err => console.error("Lỗi kết nối MongoDB:", err));
 
 app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);
-
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
