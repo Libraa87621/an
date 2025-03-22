@@ -39,4 +39,21 @@ router.get("/search", async (req, res) => {
     }
 });
 
+// Lấy sản phẩm theo ID
+router.get("/:id", async (req, res) => {
+    try {
+        const { id } = req.params; // Lấy id từ URL
+        const product = await Product.findById(id);
+
+        if (!product) {
+            return res.status(404).json({ message: "Không tìm thấy sản phẩm" });
+        }
+
+        res.json(product);
+    } catch (error) {
+        res.status(500).json({ message: "Lỗi server", error });
+    }
+});
+
+
 module.exports = router;
