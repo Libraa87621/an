@@ -28,15 +28,14 @@ router.post("/login", async (req, res) => {
         const user = await User.findOne({ email });
 
         if (!user) return res.status(400).json({ message: "Tài khoản không tồn tại" });
-
         if (password !== user.password) return res.status(400).json({ message: "Mật khẩu không đúng" });
 
-        const token = jwt.sign({ userId: user._id }, "secretKey", { expiresIn: "1h" });
-
-        res.json({ message: "Đăng nhập thành công", token });
+        // Trả về thông tin người dùng thay vì token
+        res.json({ message: "Đăng nhập thành công", user });
     } catch (error) {
         res.status(500).json({ message: "Lỗi server", error });
     }
 });
+
 
 module.exports = router;
