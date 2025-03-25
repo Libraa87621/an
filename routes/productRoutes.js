@@ -40,14 +40,6 @@ router.get("/search", async (req, res) => {
 });
 
 
-app.get("/products/:id", async (req, res) => {
-    const productId = req.params.id; // Lấy ID từ request
-    const product = await db.collection("products").findOne({ _id: productId });
-    if (!product) {
-        return res.status(404).json({ message: "Không tìm thấy sản phẩm" });
-    }
-    res.json(product);
-});
 
 
 module.exports = router;
