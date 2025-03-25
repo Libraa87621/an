@@ -39,21 +39,22 @@ router.get("/search", async (req, res) => {
     }
 });
 
-// Lấy sản phẩm theo ID
-router.get("/:id", async (req, res) => {
-    try {
-        const { id } = req.params; // Lấy id từ URL
-        const product = await Product.findById(id);
 
-        if (!product) {
-            return res.status(404).json({ message: "Không tìm thấy sản phẩm" });
-        }
+/ API lấy chi tiết sản phẩm theo ID
+app.get("/api/products/:id", async (req, res) => {
+  try {
+    const productId = req.params.id; // Lấy productId từ URL
+    const product = await Product.findById(productId); // Tìm sản phẩm trong DB theo ID
 
-        res.json(product);
-    } catch (error) {
-        res.status(500).json({ message: "Lỗi server", error });
+    if (!product) {
+      return res.status(404).json({ message: "Không tìm thấy sản phẩm" });
     }
-});
 
+    res.json(product); // Trả về thông tin chi tiết sản phẩm
+  } catch (error) {
+    console.error("Lỗi khi lấy sản phẩm:", error);
+    res.status(500).json({ message: "Lỗi server" });
+  }
+});
 
 module.exports = router;
