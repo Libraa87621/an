@@ -39,23 +39,22 @@ router.get("/search", async (req, res) => {
     }
 });
 
-// Lấy chi tiết sản phẩm theo ID
-router.get("/:id", async (req, res) => {
+// Lấy chi tiết sản phẩm theo tên sản phẩm
+router.get("/name/:name", async (req, res) => {
     try {
-        const { id } = req.params; // Lấy ID từ params URL
+        const { name } = req.params; // Lấy tên sản phẩm từ URL
 
-        // Kiểm tra ID có phải ObjectId hợp lệ của MongoDB không
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            return res.status(400).json({ message: "ID sản phẩm không hợp lệ" });
+        if (!name) {
+            return res.status(400).json({ message: "Tên sản phẩm không hợp lệ" });
         }
 
-        const product = await Product.findById(id); // Tìm sản phẩm theo ID trong DB
+        const product = await Product.findOne({ name: name });
 
         if (!product) {
             return res.status(404).json({ message: "Không tìm thấy sản phẩm" });
         }
 
-        res.status(200).json(product); // Trả về thông tin sản phẩm nếu tìm thấy
+        res.status(200).json(product);
     } catch (error) {
         console.error("Lỗi khi lấy chi tiết sản phẩm:", error);
         res.status(500).json({ message: "Lỗi server", error });
