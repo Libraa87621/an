@@ -6,10 +6,11 @@ const productSchema = new mongoose.Schema({
     image: { type: String, required: true },
     description: { type: String, required: true },
     tags: { type: [String], required: true },
-    category: { type: String, required: true }, // Thêm category
-    stock: { type: Number, required: true, default: 0 } // Thêm stock
+    category: { type: String, required: true },
+    stock: { type: Number, required: true, default: 0 },
+    size: { type: String, required: true }, // Thêm size
+    origin: { type: String, required: true }, // Thêm origin
 });
-
 
 const Product = mongoose.model("Product", productSchema);
 module.exports = Product;
