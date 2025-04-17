@@ -58,23 +58,29 @@ router.post("/add", async (req, res) => {
     }
   });
 
-// Xóa sản phẩm khỏi giỏ hàng
-router.delete("/:userId/:productId", async (req, res) => {
-  const { userId, productId } = req.params;
-
-  try {
-    const cart = await Cart.findOne({ userId });
-    if (!cart) {
-      return res.status(404).json({ message: "Giỏ hàng không tồn tại" });
+  router.delete("/:productId", async (req, res) => {
+    const { productId } = req.params;
+  
+    try {
+      // Tìm giỏ hàng chứa sản phẩm
+      const cart = await Cart.findOne({ "items.productId": productId });
+      if (!cart) {
+        return res.status(404).json({ message: "Giỏ hàng không tồn tại hoặc không chứa sản phẩm này" });
+      }
+  
+      // Lọc bỏ sản phẩm khỏi giỏ hàng
+      cart.items = cart.items.filter((item) => item.productId.toString() !== productId);
+  
+      // Lưu giỏ hàng sau khi xóa sản phẩm
+      await cart.save();
+  
+      // Trả về giỏ hàng đã cập nhật
+      res.json({ message: "Xóa sản phẩm thành công", cart });
+    } catch (error) {
+      console.error("Lỗi khi xóa sản phẩm khỏi giỏ hàng:", error);
+      res.status(500).json({ message: "Lỗi khi xóa sản phẩm khỏi giỏ hàng", error });
     }
-
-    cart.items = cart.items.filter((item) => item.productId.toString() !== productId);
-    await cart.save();
-    res.json(cart.items);
-  } catch (error) {
-    res.status(500).json({ message: "Lỗi khi xóa sản phẩm khỏi giỏ hàng", error });
-  }
-});
+  });
 
 router.put("/:userId/:productId", async (req, res) => {
     const { userId, productId } = req.params;
