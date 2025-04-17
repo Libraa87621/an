@@ -76,34 +76,34 @@ router.delete("/:userId/:productId", async (req, res) => {
   }
 });
 
-router.put("/:productId", async (req, res) => {
-  const { productId } = req.params;
-  const { quantity } = req.body;
-
-  try {
-    // Tìm tất cả giỏ hàng có chứa sản phẩm cần cập nhật
-    const carts = await Cart.find({ "items.productId": productId });
-
-    if (!carts || carts.length === 0) {
-      return res.status(404).json({ message: "Không tìm thấy sản phẩm trong bất kỳ giỏ hàng nào" });
-    }
-
-    // Cập nhật số lượng và tổng tiền cho sản phẩm trong từng giỏ hàng
-    for (const cart of carts) {
-      const item = cart.items.find((item) => item.productId.toString() === productId);
-      if (item) {
-        item.quantity = quantity;
-        item.total = item.price * quantity;
-        await cart.save();
+router.put("/:userId/:productId", async (req, res) => {
+    const { userId, productId } = req.params;
+    const { quantity } = req.body;
+  
+    try {
+      const cart = await Cart.findOne({ userId });
+      if (!cart) {
+        return res.status(404).json({ message: "Giỏ hàng không tồn tại" });
       }
+  
+      console.log("Danh sách sản phẩm trong giỏ hàng:", cart.items);
+      console.log("Tìm kiếm sản phẩm với productId:", productId);
+  
+      const item = cart.items.find((item) => item.productId.toString() === productId);
+      if (!item) {
+        return res.status(404).json({ message: "Sản phẩm không tồn tại trong giỏ hàng" });
+      }
+  
+      item.quantity = quantity;
+      item.total = item.price * quantity;
+  
+      await cart.save();
+      res.json(cart.items);
+    } catch (error) {
+      console.error("Lỗi khi cập nhật giỏ hàng:", error);
+      res.status(500).json({ message: "Lỗi khi cập nhật giỏ hàng", error });
     }
-
-    res.json({ message: "Cập nhật thành công", carts });
-  } catch (error) {
-    console.error("Lỗi khi cập nhật giỏ hàng:", error);
-    res.status(500).json({ message: "Lỗi khi cập nhật giỏ hàng", error });
-  }
-});
+  });
 
 // Thanh toán giỏ hàng
 router.post("/checkout", async (req, res) => {
