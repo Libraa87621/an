@@ -1,6 +1,6 @@
 const express = require("express");
-const Cart = require("../models/Cart");
-const Product = require("../models/Product"); // Import Product model
+const Cart = require("../Models/cartModels");
+const Product = require("../Models/productModels"); // Import Product model
 const router = express.Router();
 
 // Lấy giỏ hàng của người dùng
