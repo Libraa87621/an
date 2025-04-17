@@ -42,7 +42,7 @@ router.post("/add", async (req, res) => {
           productId,
           name: product.name,
           price: product.price,
-          img: product.image, 
+          image: product.image, 
           quantity,
           total,
         });
