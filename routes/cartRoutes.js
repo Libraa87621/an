@@ -115,7 +115,6 @@ router.put("/:userId/:productId", async (req, res) => {
       res.status(500).json({ message: "Lỗi khi cập nhật giỏ hàng", error });
     }
   });
-
 // Thanh toán giỏ hàng
 router.post("/checkout", async (req, res) => {
   const { userId } = req.body;
