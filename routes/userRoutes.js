@@ -15,7 +15,7 @@ router.post("/register", async (req, res) => {
         const newUser = new User({ fullName, email, phoneNumber, password });
         await newUser.save();
 
-        res.status(201).json({ message: "Đăng ký thành công" });
+        res.status(201).json({ message: "Đăng ký thành công", userId: newUser._id });
     } catch (error) {
         res.status(500).json({ message: "Lỗi server", error });
     }
@@ -30,8 +30,8 @@ router.post("/login", async (req, res) => {
         if (!user) return res.status(400).json({ message: "Tài khoản không tồn tại" });
         if (password !== user.password) return res.status(400).json({ message: "Mật khẩu không đúng" });
 
-        // Trả về thông tin người dùng thay vì token
-        res.json({ message: "Đăng nhập thành công", user });
+        // Trả về thông tin người dùng, bao gồm userId
+        res.json({ message: "Đăng nhập thành công", userId: user._id, fullName: user.fullName });
     } catch (error) {
         res.status(500).json({ message: "Lỗi server", error });
     }
