@@ -4,49 +4,59 @@ const Product = require("../Models/productModels"); // Import Product model
 const router = express.Router();
 
 // Lấy giỏ hàng của người dùng
+// Lấy giỏ hàng của người dùng
 router.get("/:userId", async (req, res) => {
-  try {
-    const cart = await Cart.findOne({ userId: req.params.userId }).populate("items.productId");
-    if (!cart) {
-      return res.status(404).json({ message: "Giỏ hàng không tồn tại" });
+    try {
+      const cart = await Cart.findOne({ userId: req.params.userId }).populate("items.productId");
+      if (!cart) {
+        return res.status(404).json({ message: "Giỏ hàng không tồn tại" });
+      }
+      res.json(cart.items);
+    } catch (error) {
+      res.status(500).json({ message: "Lỗi khi lấy giỏ hàng", error });
     }
-    res.json(cart.items);
-  } catch (error) {
-    res.status(500).json({ message: "Lỗi khi lấy giỏ hàng", error });
-  }
-});
-
+  });
 // Thêm sản phẩm vào giỏ hàng
 router.post("/add", async (req, res) => {
-  const { userId, productId, quantity } = req.body;
-
-  try {
-    const product = await Product.findById(productId);
-    if (!product) {
-      return res.status(404).json({ message: "Sản phẩm không tồn tại" });
+    const { userId, productId, quantity } = req.body;
+  
+    try {
+      const product = await Product.findById(productId);
+      if (!product) {
+        return res.status(404).json({ message: "Sản phẩm không tồn tại" });
+      }
+  
+      const total = product.price * quantity;
+  
+      let cart = await Cart.findOne({ userId });
+      if (!cart) {
+        cart = new Cart({ userId, items: [] });
+      }
+  
+      const existingItem = cart.items.find((item) => item.productId.toString() === productId);
+      if (existingItem) {
+        existingItem.quantity += quantity;
+        existingItem.total = existingItem.quantity * product.price;
+      } else {
+        cart.items.push({
+          productId,
+          name: product.name,
+          price: product.price,
+          img: product.image, // Lưu hình ảnh tại đây
+          quantity,
+          total,
+        });
+      }
+  
+      await cart.save();
+  
+      // Sử dụng populate để trả về dữ liệu đầy đủ
+      const populatedCart = await Cart.findOne({ userId }).populate("items.productId");
+      res.json(populatedCart.items);
+    } catch (error) {
+      res.status(500).json({ message: "Lỗi khi thêm vào giỏ hàng", error });
     }
-
-    const total = product.price * quantity;
-
-    let cart = await Cart.findOne({ userId });
-    if (!cart) {
-      cart = new Cart({ userId, items: [] });
-    }
-
-    const existingItem = cart.items.find((item) => item.productId.toString() === productId);
-    if (existingItem) {
-      existingItem.quantity += quantity;
-      existingItem.total = existingItem.quantity * product.price;
-    } else {
-      cart.items.push({ productId, name: product.name, price: product.price, img: product.image, quantity, total });
-    }
-
-    await cart.save();
-    res.json(cart.items);
-  } catch (error) {
-    res.status(500).json({ message: "Lỗi khi thêm vào giỏ hàng", error });
-  }
-});
+  });
 
 // Xóa sản phẩm khỏi giỏ hàng
 router.delete("/:userId/:productId", async (req, res) => {
