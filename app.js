@@ -8,6 +8,7 @@ const mongoose = require("mongoose"); // Thêm dòng này
 
 var productRoutes = require("./routes/productRoutes");
 var userRoutes = require("./routes/userRoutes");
+var cartRoutes = require("./routes/cartRoutes");
 
 const app = express();
 app.use(express.json());
@@ -20,6 +21,8 @@ mongoose
 
 app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);
+app.use("/api/cart", cartRoutes);
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
