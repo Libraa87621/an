@@ -81,6 +81,12 @@ router.put("/:userId/:productId", async (req, res) => {
     const { quantity } = req.body;
   
     try {
+      // Kiểm tra số lượng hợp lệ
+      if (quantity < 1) {
+        return res.status(400).json({ message: "Số lượng phải lớn hơn hoặc bằng 1" });
+      }
+  
+      // Tìm giỏ hàng của người dùng
       const cart = await Cart.findOne({ userId });
       if (!cart) {
         return res.status(404).json({ message: "Giỏ hàng không tồn tại" });
@@ -89,16 +95,21 @@ router.put("/:userId/:productId", async (req, res) => {
       console.log("Danh sách sản phẩm trong giỏ hàng:", cart.items);
       console.log("Tìm kiếm sản phẩm với productId:", productId);
   
+      // Tìm sản phẩm trong giỏ hàng
       const item = cart.items.find((item) => item.productId.toString() === productId);
       if (!item) {
         return res.status(404).json({ message: "Sản phẩm không tồn tại trong giỏ hàng" });
       }
   
+      // Cập nhật số lượng và tổng giá
       item.quantity = quantity;
       item.total = item.price * quantity;
   
+      // Lưu giỏ hàng
       await cart.save();
-      res.json(cart.items);
+  
+      // Trả về giỏ hàng đã cập nhật
+      res.json({ message: "Cập nhật thành công", cart });
     } catch (error) {
       console.error("Lỗi khi cập nhật giỏ hàng:", error);
       res.status(500).json({ message: "Lỗi khi cập nhật giỏ hàng", error });
