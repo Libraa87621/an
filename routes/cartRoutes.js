@@ -98,23 +98,36 @@ router.put("/:userId/:productId", async (req, res) => {
       // Tìm sản phẩm trong giỏ hàng
       const item = cart.items.find((item) => item.productId.toString() === productId);
       if (!item) {
-        return res.status(404).json({ message: "Sản phẩm không tồn tại trong giỏ hàng" });
+        console.log("Sản phẩm không tồn tại trong giỏ hàng. Danh sách sản phẩm hiện tại:", cart.items);
+        return res.status(404).json({ 
+          message: "Sản phẩm không tồn tại trong giỏ hàng", 
+          productId: productId, 
+          cartItems: cart.items 
+        });
       }
-  
+      
+      // Log thông tin trước khi cập nhật
+      console.log("Cập nhật sản phẩm:", {
+        productId: item.productId,
+        currentQuantity: item.quantity,
+        newQuantity: quantity,
+        currentTotal: item.total,
+        pricePerUnit: item.price,
+      });
+      
       // Cập nhật số lượng và tổng giá
       item.quantity = quantity;
       item.total = item.price * quantity;
-  
+      
       // Lưu giỏ hàng
       await cart.save();
-  
+      
+      // Log thông tin sau khi cập nhật
+      console.log("Giỏ hàng sau khi cập nhật:", cart);
+      
       // Trả về giỏ hàng đã cập nhật
       res.json({ message: "Cập nhật thành công", cart });
-    } catch (error) {
-      console.error("Lỗi khi cập nhật giỏ hàng:", error);
-      res.status(500).json({ message: "Lỗi khi cập nhật giỏ hàng", error });
-    }
-  });
+
 // Thanh toán giỏ hàng
 router.post("/checkout", async (req, res) => {
   const { userId } = req.body;
