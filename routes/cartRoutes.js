@@ -78,29 +78,41 @@ router.delete("/:userId/:productId", async (req, res) => {
 
 // Cập nhật số lượng sản phẩm trong giỏ hàng
 router.put("/:userId/:productId", async (req, res) => {
-  const { userId, productId } = req.params;
-  const { quantity } = req.body;
-
-  try {
-    const cart = await Cart.findOne({ userId });
-    if (!cart) {
-      return res.status(404).json({ message: "Giỏ hàng không tồn tại" });
+    const { userId, productId } = req.params;
+    const { quantity } = req.body;
+  
+    try {
+      // Kiểm tra số lượng hợp lệ
+      if (quantity < 1) {
+        return res.status(400).json({ message: "Số lượng phải lớn hơn hoặc bằng 1" });
+      }
+  
+      // Tìm giỏ hàng của người dùng
+      const cart = await Cart.findOne({ userId });
+      if (!cart) {
+        return res.status(404).json({ message: "Giỏ hàng không tồn tại" });
+      }
+  
+      // Tìm sản phẩm trong giỏ hàng
+      const item = cart.items.find((item) => item.productId.toString() === productId);
+      if (!item) {
+        return res.status(404).json({ message: "Sản phẩm không tồn tại trong giỏ hàng" });
+      }
+  
+      // Cập nhật số lượng và tổng giá
+      item.quantity = quantity;
+      item.total = item.price * quantity;
+  
+      // Lưu giỏ hàng
+      await cart.save();
+  
+      // Trả về danh sách sản phẩm trong giỏ hàng
+      res.json(cart.items);
+    } catch (error) {
+      console.error("Lỗi khi cập nhật giỏ hàng:", error);
+      res.status(500).json({ message: "Lỗi khi cập nhật giỏ hàng", error });
     }
-
-    const item = cart.items.find((item) => item.productId.toString() === productId);
-    if (!item) {
-      return res.status(404).json({ message: "Sản phẩm không tồn tại trong giỏ hàng" });
-    }
-
-    item.quantity = quantity;
-    item.total = item.price * quantity;
-
-    await cart.save();
-    res.json(cart.items);
-  } catch (error) {
-    res.status(500).json({ message: "Lỗi khi cập nhật giỏ hàng", error });
-  }
-});
+  });
 
 // Thanh toán giỏ hàng
 router.post("/checkout", async (req, res) => {
