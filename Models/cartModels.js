@@ -5,7 +5,7 @@ const cartItemSchema = new mongoose.Schema({
   productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true }, // Tham chiếu đến Product
   name: { type: String, required: true },
   price: { type: Number, required: true },
-  img: { type: String },
+  image: { type: String, required: true },
   quantity: { type: Number, required: true, default: 1 },
   total: { type: Number, required: true }, // Tổng giá trị của sản phẩm trong giỏ hàng
 });
